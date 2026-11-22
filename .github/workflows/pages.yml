@@ -4,7 +4,7 @@ on:
     branches: ["main"]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -19,6 +19,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Decode and commit binary assets
+        run: |
+          set -euo pipefail
+          if [ -f .bootstrap/binaries.tar.gz.b64 ]; then
+            base64 -d .bootstrap/binaries.tar.gz.b64 | tar -xz -C assets
+            rm -rf .bootstrap
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Add binary assets (images and video)"
+            git push
+          elif ls .bootstrap/binaries.tar.gz.b64.part* >/dev/null 2>&1; then
+            cat .bootstrap/binaries.tar.gz.b64.part* | base64 -d | tar -xz -C assets
+            rm -rf .bootstrap
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Add binary assets (images and video)"
+            git push
+          fi
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
