@@ -22,6 +22,7 @@ window.SITE_CONFIG = {
   // 👉 ลิงก์เทเลแกรม  ตัวอย่าง "https://t.me/ชื่อผู้ใช้"
   TELEGRAM_URL: "https://www.facebook.com/profile.php?id=100085610846878",
 
-  // 👉 ใส่ Pixel ID จาก Events Manager (ตัวเลขล้วน) เช่น "123456789012345"
+  // 👉 โค้ดพิกเซลพื้นฐานอยู่ใน index.html ระหว่างแท็ก <head> แล้ว (ไม่ต้องวางซ้ำ)
+  //    ถ้าต้องเปลี่ยน Pixel ID ให้แก้ทั้งใน index.html (<head>) และค่าด้านล่างนี้ด้วย
   FB_PIXEL_ID: "1456938315908310"
 };
