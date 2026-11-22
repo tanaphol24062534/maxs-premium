@@ -21,11 +21,43 @@
     return raw;
   }
 
+  function initPixel(id) {
+    id = trim(id);
+    if (!id) return;
+    if (!window.fbq) {
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+    }
+    window.fbq("init", id);
+    window.fbq("track", "PageView");
+  }
+
+  function track(eventName) {
+    if (typeof window.fbq === "function") {
+      window.fbq("track", eventName);
+    }
+  }
+
   function wire(selector, href) {
     document.querySelectorAll(selector).forEach(function (el) {
       if (href) {
         el.setAttribute("href", href);
-        el.classList.remove("is-soon");
+        el.classList.remove("is-soon", "is-hidden");
+        el.removeAttribute("hidden");
         el.removeAttribute("aria-disabled");
         if (!/^tel:/i.test(href)) {
           el.setAttribute("target", "_blank");
@@ -36,16 +68,17 @@
         }
       } else {
         el.setAttribute("href", "#");
-        el.classList.add("is-soon");
+        el.classList.add("is-hidden");
+        el.setAttribute("hidden", "");
+        el.classList.remove("is-soon");
         el.setAttribute("aria-disabled", "true");
-        var label = el.querySelector("[data-label]");
-        if (label) label.textContent = "เร็ว ๆ นี้";
-        el.addEventListener("click", function (e) {
-          e.preventDefault();
-        });
+        el.removeAttribute("target");
+        el.removeAttribute("rel");
       }
     });
   }
+
+  initPixel(cfg.FB_PIXEL_ID);
 
   var entry = trim(cfg.ENTRY_URL);
   var line = trim(cfg.LINE_URL);
@@ -64,6 +97,22 @@
       el.textContent = prettyPhone(phone);
     });
   }
+
+  document.querySelectorAll('[data-link="entry"]').forEach(function (el) {
+    el.addEventListener("click", function () {
+      if (el.hasAttribute("hidden") || el.getAttribute("aria-disabled") === "true") return;
+      track("Lead");
+    });
+  });
+
+  ["line", "facebook", "phone", "telegram"].forEach(function (kind) {
+    document.querySelectorAll('[data-link="' + kind + '"]').forEach(function (el) {
+      el.addEventListener("click", function () {
+        if (el.hasAttribute("hidden") || el.getAttribute("aria-disabled") === "true") return;
+        track("Contact");
+      });
+    });
+  });
 
   /* Sticky nav shadow + mobile menu */
   var nav = document.querySelector(".nav");
@@ -121,7 +170,14 @@
   /* Floating contact */
   var fab = document.querySelector(".fab");
   var fabBtn = document.querySelector(".fab-toggle");
-  if (fab && fabBtn) {
+  if (fab) {
+    var visibleFabItems = fab.querySelectorAll(".fab-item:not(.is-hidden)");
+    if (visibleFabItems.length === 0) {
+      fab.classList.add("is-hidden");
+      fab.setAttribute("hidden", "");
+    }
+  }
+  if (fab && fabBtn && !fab.hasAttribute("hidden")) {
     fabBtn.addEventListener("click", function () {
       var open = !fab.classList.contains("is-open");
       fab.classList.toggle("is-open", open);

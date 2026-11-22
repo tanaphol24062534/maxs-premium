@@ -97,6 +97,11 @@ a.is-soon {
 }
 .btn.is-soon:hover { transform: none; }
 
+.is-hidden,
+[hidden] {
+  display: none !important;
+}
+
 /* ---------- nav ---------- */
 .nav {
   position: sticky;
